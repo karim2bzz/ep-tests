@@ -76,34 +76,41 @@ function updateTimer() {
 setInterval(updateTimer, 1000);
 updateTimer();
 
+// FORMULAIRE DE CONTACT
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("contactForm");
+  const merciMessage = document.getElementById("merciMessage");
 
-const form = document.getElementById('contactForm');
-const merciMessage = document.getElementById('merciMessage');
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault(); // bloquer envoi classique
+    const nom = form.elements["nom"].value;
+    const email = form.elements["email"].value;
+    const message = form.elements["message"].value;
 
-  const formData = new FormData(form);
+    try {
+      const response = await fetch("/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nom, email, message }),
+      });
 
-  try {
-    const response = await fetch(form.action, {
-      method: form.method,
-      body: formData,
-      headers: {
-        'Accept': 'application/json'
+      if (response.ok) {
+        form.reset();
+        merciMessage.style.display = "block";
+        merciMessage.textContent = "🎉 Merci pour ton message !";
+        merciMessage.style.color = "green";
+      } else {
+        merciMessage.style.display = "block";
+        merciMessage.textContent = "❌ Erreur lors de l’envoi. Réessaie.";
+        merciMessage.style.color = "red";
       }
-    });
-
-    if (response.ok) {
-      // Reset formulaire
-      form.reset();
-
-      // Affiche message de merci
-      merciMessage.style.display = 'flex';
-    } else {
-      alert('Erreur lors de l’envoi. Merci de réessayer.');
+    } catch (error) {
+      merciMessage.style.display = "block";
+      merciMessage.textContent = "❌ Erreur réseau. Vérifie ta connexion.";
+      merciMessage.style.color = "red";
     }
-  } catch (error) {
-    alert('Erreur réseau. Merci de vérifier votre connexion.');
-  }
+  });
 });
